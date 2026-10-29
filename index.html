@@ -59,6 +59,7 @@ button:focus,input:focus,select:focus{outline:2px solid #c98198}
 <button data-page="payments">Payments</button>
 <button data-page="staff">Staff & Attendance</button>
 </nav>
+<button id="logoutBtn" type="button" class="btn">Log Out</button>  
 <section id="home" class="page">
 <div class="notice">Welcome! Keep track of tailoring orders, delivery dates, payments and your team in one place.</div>
 <div class="stats" style="margin-top:12px">
@@ -151,6 +152,10 @@ supabase.auth.onAuthStateChange((_event, session) => {
 });
 
 showLoginState();
+$("logoutBtn").onclick = async () => {
+const { error } = await supabase.auth.signOut();
+if (error) alert(error.message);
+};
 const load=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key))||fallback}catch(e){return fallback}};
 let orders=load("miraaya_orders",[]),staff=load("miraaya_staff",[]),attendance=load("miraaya_attendance",{});
 const save=()=>{localStorage.setItem("miraaya_orders",JSON.stringify(orders));localStorage.setItem("miraaya_staff",JSON.stringify(staff));localStorage.setItem("miraaya_attendance",JSON.stringify(attendance));render()};
