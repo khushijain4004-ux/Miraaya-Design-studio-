@@ -106,7 +106,12 @@ input,select,textarea{width:100%;padding:11px;border:1px solid #dccbd1;border-ra
         <div><label for="amount">Total amount (₹)</label><input id="amount" name="amount" type="number" min="0" value="0"></div>
         <div><label for="advance">Advance received (₹)</label><input id="advance" name="advance" type="number" min="0" value="0"></div>
         <div><label for="reminder">Order reminder</label><select id="reminder" name="reminder"><option value="1">1 day before due date</option><option value="2">2 days before due date</option><option value="0">Due date only</option></select></div>
-        <div class="full"><label for="notes">Notes</label><textarea id="notes" name="notes" rows="2" placeholder="Design notes (avoid sensitive details)"></textarea></div>
+        <div class="full"><h3 style="margin-top:8px">Measurement sheet photo</h3><p class="small">Keep this section blank and upload a photo of your own measurement sheet.</p>
+          <label for="measurementPhoto">Upload measurement sheet photo</label>
+          <input id="measurementPhoto" type="file" accept="image/*">
+          <div id="measurementPhotoPreview" class="photo-grid"></div>
+        </div>
+        <div class="full"><label for="notes">Order / design notes</label><textarea id="notes" name="notes" rows="2" placeholder="Design notes"></textarea></div>
         <div class="full">
           <label for="orderPhotos">Fabric and pattern photos</label>
           <input id="orderPhotos" type="file" accept="image/*" multiple>
@@ -150,6 +155,7 @@ let orders = load("miraaya_orders", []);
 let staff = load("miraaya_staff", []);
 let attendance = load("miraaya_attendance", {});
 let pendingPhotos = [];
+let pendingMeasurementPhoto = null;
 
 function load(key, fallback) {
   try {
@@ -297,6 +303,21 @@ $("orderPhotos").addEventListener("change", async event => {
     alert(error.message);
   }
 });
+$("measurementPhoto").addEventListener("change", async event => {
+  const file = (event.target.files || [])[0];
+  pendingMeasurementPhoto = null;
+  $("measurementPhotoPreview").innerHTML = "";
+  if (!file) return;
+  try {
+    pendingMeasurementPhoto = await readImage(file);
+    $("measurementPhotoPreview").innerHTML = `<div class="photo-card"><img src="${pendingMeasurementPhoto.data}" alt="Measurement sheet photo"><span class="small">${esc(pendingMeasurementPhoto.name)}</span><button class="btn" type="button" id="removeMeasurementPhoto">Remove</button></div>`;
+    $("removeMeasurementPhoto").addEventListener("click", () => {
+      pendingMeasurementPhoto = null;
+      $("measurementPhoto").value = "";
+      $("measurementPhotoPreview").innerHTML = "";
+    });
+  } catch (error) { alert(error.message); }
+});
 function renderPhotoPreview() {
   $("photoPreview").innerHTML = pendingPhotos.map((photo, index) =>
     `<div class="photo-card"><img src="${photo.data}" alt="Selected fabric or pattern photo"><span class="small">${esc(photo.name)}</span><button class="btn" type="button" data-remove-preview="${index}">Remove</button></div>`
@@ -327,6 +348,7 @@ $("orderForm").addEventListener("submit", event => {
     advance: Number(data.advance || 0),
     reminder: Number(data.reminder || 0),
     notes: data.notes.trim(),
+    measurementPhoto: pendingMeasurementPhoto,
     photos: pendingPhotos.slice()
   };
   orders.unshift(order);
@@ -336,6 +358,7 @@ $("orderForm").addEventListener("submit", event => {
     return;
   }
   pendingPhotos = [];
+  pendingMeasurementPhoto = null;
   form.reset();
   $("qty").value = "1";
   $("amount").value = "0";
@@ -343,6 +366,8 @@ $("orderForm").addEventListener("submit", event => {
   $("orderDate").value = today();
   $("photoPreview").innerHTML = "";
   $("orderPhotos").value = "";
+  $("measurementPhotoPreview").innerHTML = "";
+  $("measurementPhoto").value = "";
   saveAll();
   alert("Order saved on this device with its photos.");
 });
@@ -417,7 +442,8 @@ function render() {
       <p>Cutting: <select data-update-order="${order.id}" data-field="cutting">${opts(["Not started","In progress","Completed"], order.cutting || "Not started")}</select></p>
       <p>Stitching: <select data-update-order="${order.id}" data-field="stitching">${opts(["Not started","In progress","Completed"], order.stitching || "Not started")}</select></p>
       <p>Assigned: ${esc(order.worker || "Not assigned")}</p>
-      ${order.notes ? `<p>Notes: ${esc(order.notes)}</p>` : ""}
+      ${order.notes ? `<p>Order notes: ${esc(order.notes)}</p>` : ""}
+      ${order.measurementPhoto ? `<div class="order-photos"><b>Measurement sheet photo</b><div class="photo-grid"><div class="photo-card"><a href="${order.measurementPhoto.data}" target="_blank" rel="noopener"><img src="${order.measurementPhoto.data}" alt="Customer measurement sheet"></a><span class="small">${esc(order.measurementPhoto.name || "Measurement sheet")}</span><button class="btn" type="button" data-delete-measurement-photo="${order.id}">Delete photo</button></div></div></div>` : ""}
       <p>Total ${money(order.amount)} · Advance ${money(order.advance)} · Balance ${money(Math.max(0, Number(order.amount || 0) - Number(order.advance || 0)))}</p>
       ${photoMarkup(order)}
     </div>`
