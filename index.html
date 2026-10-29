@@ -119,6 +119,7 @@ const SUPABASE_URL = "https://fhypgkxtepqbjewzojpl.supabase.co";
 const SUPABASE_KEY = "sb_publishable_pyS5ndTJlrEvsRf6uslSgg_N0-8owM1";
 const supabase =
  window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  $("loginMessage").textContent = "JavaScript is running";
 async function showLoginState() {
   const { data: { session } } = await supabase.auth.getSession();
   $("loginScreen").style.display = session ? "none" : "block";
