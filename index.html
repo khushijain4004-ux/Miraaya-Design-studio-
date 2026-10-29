@@ -40,7 +40,19 @@ button:focus,input:focus,select:focus{outline:2px solid #c98198}
 <h1>Miraaya Design Studio</h1>
 <p>Your boutique, beautifully organised ✿</p>
 </header>
-<main>
+<div id="loginScreen" style="max-width:420px;margin:60px auto;padding:24px;border:1px solid #ead6df;border-radius:16px;background:#fff8fb;color:#4b2638;">
+  <h2 style="text-align:center;">Miraaya Design Studio</h2>
+  <p style="text-align:center;">Owner & Staff Login</p>
+  <form id="loginForm">
+    <label for="loginEmail">Email address</label>
+    <input id="loginEmail" type="email" required autocomplete="username" style="display:block;width:100%;box-sizing:border-box;padding:12px;margin:8px 0 16px;">
+    <label for="loginPassword">Password</label>
+    <input id="loginPassword" type="password" required autocomplete="current-password" style="display:block;width:100%;box-sizing:border-box;padding:12px;margin:8px 0 16px;">
+    <button type="submit" style="width:100%;padding:12px;background:#873e61;color:white;border:0;border-radius:8px;">Log In</button>
+    <p id="loginMessage" role="status"></p>
+  </form>
+</div>
+<main id="appMain" hidden>
 <nav id="nav">
 <button class="active" data-page="home">Dashboard</button>
 <button data-page="orders">Orders</button>
@@ -104,7 +116,41 @@ button:focus,input:focus,select:focus{outline:2px solid #c98198}
 const $=id=>document.getElementById(id);
 const SUPABASE_URL = "https://fhypgkxtepqbjewzojpl.supabase.co";
 const SUPABASE_KEY = "sb_publishable_pyS5ndTJlrEvsRf6uslSgg_N0-8owM1";
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabase =
+ window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+async function showLoginState() {
+  const { data: { session } } = await supabase.auth.getSession();
+  $("loginScreen").style.display = session ? "none" : "block";
+  $("appMain").hidden = !session;
+}
+
+$("loginForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const email = $("loginEmail").value.trim();
+  const password = $("loginPassword").value;
+  $("loginMessage").textContent = "Logging in...";
+
+  const { error } = await supabase.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if (error) {
+    $("loginMessage").textContent = error.message;
+    return;
+  }
+
+  $("loginMessage").textContent = "Login successful!";
+  await showLoginState();
+});
+
+supabase.auth.onAuthStateChange((_event, session) => {
+  $("loginScreen").style.display = session ? "none" : "block";
+  $("appMain").hidden = !session;
+});
+
+showLoginState();
 const load=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key))||fallback}catch(e){return fallback}};
 let orders=load("miraaya_orders",[]),staff=load("miraaya_staff",[]),attendance=load("miraaya_attendance",{});
 const save=()=>{localStorage.setItem("miraaya_orders",JSON.stringify(orders));localStorage.setItem("miraaya_staff",JSON.stringify(staff));localStorage.setItem("miraaya_attendance",JSON.stringify(attendance));render()};
