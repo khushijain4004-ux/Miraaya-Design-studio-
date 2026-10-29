@@ -2,73 +2,137 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Miraaya Design Studio</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #faf5f0;
-      color: #49332f;
-      padding: 20px;
-    }
-    .card {
-      background: white;
-      padding: 20px;
-      margin: 15px auto;
-      border-radius: 14px;
-      max-width: 500px;
-    }
-    h1 { color: #874b55; }
-    input, button {
-      box-sizing: border-box;
-      width: 100%;
-      padding: 12px;
-      margin: 7px 0;
-      border-radius: 8px;
-    }
-    button {
-      background: #874b55;
-      color: white;
-      border: 0;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Miraaya Design Studio</title>
+<style>
+:root{--pink:#f3dce3;--rose:#a64d68;--cream:#fffaf4;--ink:#493640;--line:#eadce0}
+*{box-sizing:border-box}
+body{margin:0;background:var(--cream);color:var(--ink);font:15px Arial,sans-serif}
+header{background:var(--pink);padding:22px 16px;text-align:center}
+header h1{margin:0;color:#85415a;font-family:Georgia,serif;font-size:27px}
+header p{margin:8px 0 0;font-size:13px}
+main{max-width:900px;margin:auto;padding:16px}
+nav{display:flex;gap:8px;overflow:auto;padding:12px 0}
+nav button,.btn{border:0;border-radius:10px;background:var(--rose);color:white;padding:11px 14px;cursor:pointer;white-space:nowrap}
+nav button{background:#f0e3e6;color:var(--ink)}
+nav button.active{background:var(--rose);color:white}
+.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.card{background:white;border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.stat strong{display:block;font-size:24px;color:var(--rose);margin-top:7px}
+h2{font-size:20px;margin:8px 0 14px}
+h3{font-size:16px;margin:0 0 10px}
+label{display:block;font-size:13px;margin:10px 0 5px}
+input,select,textarea{width:100%;padding:11px;border:1px solid #dccbd1;border-radius:9px;background:#fffdfb;color:var(--ink);font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.full{grid-column:1/-1}
+button:focus,input:focus,select:focus{outline:2px solid #c98198}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.small{font-size:12px;color:#806d75}
+.item{border-top:1px solid var(--line);padding:12px 0}
+.hidden{display:none}
+.notice{background:#fff0f3;border-radius:10px;padding:12px;font-size:13px}
+@media(max-width:500px){.grid{grid-template-columns:1fr}.full{grid-column:auto}header h1{font-size:24px}}
+</style>
 </head>
 <body>
-  <div class="card">
-    <h1>Miraaya Design Studio</h1>
-    <p>Your boutique, beautifully organised.</p>
-  </div>
-
-  <div class="card">
-    <h2>Customer Records</h2>
-    <input id="name" placeholder="Customer name">
-    <input id="phone" placeholder="Phone number">
-    <button onclick="saveCustomer()">Save Customer</button>
-    <p id="message"></p>
-    <ul id="list"></ul>
-  </div>
-
-  <script>
-    function saveCustomer() {
-      const name = document.getElementById("name").value.trim();
-      const phone = document.getElementById("phone").value.trim();
-
-      if (!name) {
-        document.getElementById("message").textContent =
-          "Please enter a customer name.";
-        return;
-      }
-
-      const item = document.createElement("li");
-      item.textContent = name + (phone ? " — " + phone : "");
-      document.getElementById("list").appendChild(item);
-
-      document.getElementById("name").value = "";
-      document.getElementById("phone").value = "";
-      document.getElementById("message").textContent =
-        "Customer added to this page.";
-    }
-  </script>
+<header>
+<h1>Miraaya Design Studio</h1>
+<p>Your boutique, beautifully organised ✿</p>
+</header>
+<main>
+<nav id="nav">
+<button class="active" data-page="home">Dashboard</button>
+<button data-page="orders">Orders</button>
+<button data-page="payments">Payments</button>
+<button data-page="staff">Staff & Attendance</button>
+</nav>
+<section id="home" class="page">
+<div class="notice">Welcome! Keep track of tailoring orders, delivery dates, payments and your team in one place.</div>
+<div class="stats" style="margin-top:12px">
+<div class="card stat">Total orders<strong id="total">0</strong></div>
+<div class="card stat">Pending stitching<strong id="stitch">0</strong></div>
+<div class="card stat">Due / overdue<strong id="due">0</strong></div>
+<div class="card stat">Payment pending<strong id="balance">₹0</strong></div>
+</div>
+<div class="card"><h3>Upcoming deliveries</h3><div id="upcoming" class="small">No orders added yet.</div></div>
+<div class="small">Starter version: records are saved only in this browser on this device. Do not enter sensitive customer data until secure login and database storage are set up.</div>
+</section>
+<section id="orders" class="page hidden">
+<h2>Order & tailoring tracker</h2>
+<form id="orderForm" class="card">
+<h3>Add a new order</h3>
+<div class="grid">
+<div><label>Customer name *</label><input name="customer" required></div>
+<div><label>Phone (optional)</label><input name="phone" type="tel"></div>
+<div><label>Garment / design</label><input name="garment" placeholder="e.g. blouse, suit"></div>
+<div><label>Quantity</label><input name="qty" type="number" min="1" value="1"></div>
+<div><label>Order date *</label><input name="orderDate" type="date" required></div>
+<div><label>Due date *</label><input name="dueDate" type="date" required></div>
+<div><label>Cutting status</label><select name="cutting"><option>Not started</option><option>In progress</option><option>Completed</option></select></div>
+<div><label>Stitching status</label><select name="stitching"><option>Not started</option><option>In progress</option><option>Completed</option></select></div>
+<div><label>Assigned tailor / master</label><input name="worker"></div>
+<div><label>Total amount (₹)</label><input name="amount" type="number" min="0" value="0"></div>
+<div><label>Advance received (₹)</label><input name="advance" type="number" min="0" value="0"></div>
+<div><label>Order reminder</label><select name="reminder"><option value="1">1 day before due date</option><option value="2">2 days before due date</option><option value="0">Due date only</option></select></div>
+<div class="full"><label>Notes</label><textarea name="notes" rows="2" placeholder="Measurements or design notes (avoid sensitive details)"></textarea></div>
+<div class="full"><button class="btn" type="submit">Save order</button></div>
+</div>
+</form>
+<div class="row"><h3>All orders</h3><button class="btn" id="notify">Enable reminders</button></div>
+<div id="orderList"></div>
+</section>
+<section id="payments" class="page hidden">
+<h2>Payments overview</h2>
+<div class="card"><p>Total order value: <strong id="payTotal">₹0</strong></p><p>Advance received: <strong id="payAdvance">₹0</strong></p><p>Balance pending: <strong id="payBalance">₹0</strong></p></div>
+<div id="paymentList"></div>
+</section>
+<section id="staff" class="page hidden">
+<h2>Staff & daily attendance</h2>
+<form id="staffForm" class="card">
+<h3>Add tailor or master</h3>
+<label>Full name *</label><input name="name" required>
+<label>Role</label><select name="role"><option>Tailor</option><option>Master</option><option>Cutter</option><option>Finishing</option><option>Other</option></select>
+<button class="btn" style="margin-top:12px" type="submit">Add staff member</button>
+</form>
+<div class="card"><label>Attendance date</label><input id="attDate" type="date"><div id="attendance"></div><button class="btn" id="saveAttendance" style="margin-top:12px">Save attendance</button></div>
+<div class="card"><h3>Staff list</h3><div id="staffList" class="small">No staff added yet.</div></div>
+</section>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const load=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key))||fallback}catch(e){return fallback}};
+let orders=load("miraaya_orders",[]),staff=load("miraaya_staff",[]),attendance=load("miraaya_attendance",{});
+const save=()=>{localStorage.setItem("miraaya_orders",JSON.stringify(orders));localStorage.setItem("miraaya_staff",JSON.stringify(staff));localStorage.setItem("miraaya_attendance",JSON.stringify(attendance));render()};
+const money=n=>"₹"+Number(n||0).toLocaleString("en-IN");
+const today=()=>new Date().toLocaleDateString("en-CA");
+$("attDate").value=today();
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("active",x===b));document.querySelectorAll(".page").forEach(p=>p.classList.toggle("hidden",p.id!==b.dataset.page));render()});
+$("orderForm").onsubmit=e=>{e.preventDefault();let f=new FormData(e.target),o=Object.fromEntries(f.entries());o.id=Date.now();o.qty=+o.qty;o.amount=+o.amount;o.advance=+o.advance;o.reminder=+o.reminder;orders.unshift(o);e.target.reset();e.target.qty.value=1;e.target.amount.value=0;e.target.advance.value=0;save();alert("Order saved on this device.")};
+$("staffForm").onsubmit=e=>{e.preventDefault();let f=new FormData(e.target);staff.push({id:Date.now(),name:f.get("name"),role:f.get("role")});e.target.reset();save()};
+$("saveAttendance").onclick=()=>{let d=$("attDate").value;if(!d)return;attendance[d]=attendance[d]||{};document.querySelectorAll("[data-att]").forEach(s=>attendance[d][s.dataset.att]=s.value);save();alert("Attendance saved on this device.")};
+$("notify").onclick=async()=>{if(!("Notification"in window)){alert("Notifications are not supported in this browser.");return}let p=await Notification.requestPermission();if(p==="granted"){alert("Reminder permission enabled. Keep the app open to check upcoming reminders.");checkReminders()}};
+function checkReminders(){if(!("Notification"in window)||Notification.permission!=="granted")return;let now=new Date();orders.forEach(o=>{let days=Math.ceil((new Date(o.dueDate+"T23:59:00")-now)/86400000);if(days===o.reminder&&o.stitching!=="Completed")new Notification("Miraaya order due soon",{body:o.customer+" — "+(o.garment||"garment")+" due "+o.dueDate})})}
+function render(){
+$("total").textContent=orders.length;
+$("stitch").textContent=orders.filter(o=>o.stitching!=="Completed").length;
+$("due").textContent=orders.filter(o=>o.dueDate<=today()&&o.stitching!=="Completed").length;
+$("balance").textContent=money(orders.reduce((s,o)=>s+Math.max(0,o.amount-o.advance),0));
+$("upcoming").innerHTML=orders.filter(o=>o.stitching!=="Completed").sort((a,b)=>a.dueDate.localeCompare(b.dueDate)).slice(0,5).map(o=>`<div class="item"><b>${esc(o.customer)}</b> — ${esc(o.garment||"Garment")}<br>Due: ${esc(o.dueDate)} · ${esc(o.stitching)}</div>`).join("")||"No pending deliveries.";
+$("orderList").innerHTML=orders.map(o=>`<div class="card"><div class="row"><b>${esc(o.customer)}</b><button class="btn" onclick="removeOrder(${o.id})">Delete</button></div><p>${esc(o.garment||"Garment")} · Qty ${o.qty||1}</p><p class="small">Order: ${esc(o.orderDate)} · Due: ${esc(o.dueDate)}</p><p>Cutting: <select onchange="updateOrder(${o.id},'cutting',this.value)">${opts(["Not started","In progress","Completed"],o.cutting)}</select></p><p>Stitching: <select onchange="updateOrder(${o.id},'stitching',this.value)">${opts(["Not started","In progress","Completed"],o.stitching)}</select></p><p>Assigned: ${esc(o.worker||"Not assigned")}</p><p>Total ${money(o.amount)} · Advance ${money(o.advance)} · Balance ${money(Math.max(0,o.amount-o.advance))}</p></div>`).join("")||'<div class="card small">No orders yet. Use the form above to add your first order.</div>';
+let total=orders.reduce((s,o)=>s+o.amount,0),adv=orders.reduce((s,o)=>s+o.advance,0);
+$("payTotal").textContent=money(total);$("payAdvance").textContent=money(adv);$("payBalance").textContent=money(Math.max(0,total-adv));
+$("paymentList").innerHTML=orders.map(o=>`<div class="item"><b>${esc(o.customer)}</b> — balance ${money(Math.max(0,o.amount-o.advance))}<br><span class="small">${esc(o.garment||"Garment")} · Due ${esc(o.dueDate)}</span></div>`).join("")||"No payments yet.";
+$("staffList").innerHTML=staff.map(s=>`<div class="item"><b>${esc(s.name)}</b> — ${esc(s.role)} <button class="btn" onclick="removeStaff(${s.id})">Remove</button></div>`).join("")||"No staff added yet.";
+let d=$("attDate").value;attendance[d]=attendance[d]||{};
+$("attendance").innerHTML=staff.map(s=>`<div class="item"><label>${esc(s.name)} — ${esc(s.role)}</label><select data-att="${s.id}">${opts(["Present","Absent","Half-day","Leave"],attendance[d][s.id]||"Present")}</select></div>`).join("")||'<p class="small">Add staff above to record attendance.</p>';
+}
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function opts(items,selected){return items.map(x=>`<option ${x===selected?"selected":""}>${x}</option>`).join("")}
+function updateOrder(id,key,value){let o=orders.find(o=>o.id===id);if(o){o[key]=value;save()}}
+function removeOrder(id){if(confirm("Delete this order?")){orders=orders.filter(o=>o.id!==id);save()}}
+function removeStaff(id){if(confirm("Remove this staff member?")){staff=staff.filter(s=>s.id!==id);save()}}
+render();
+</script>
 </body>
 </html>
