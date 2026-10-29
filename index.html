@@ -98,9 +98,13 @@ button:focus,input:focus,select:focus{outline:2px solid #c98198}
 <div class="card"><label>Attendance date</label><input id="attDate" type="date"><div id="attendance"></div><button class="btn" id="saveAttendance" style="margin-top:12px">Save attendance</button></div>
 <div class="card"><h3>Staff list</h3><div id="staffList" class="small">No staff added yet.</div></div>
 </section>
-</main>
+</main> 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const $=id=>document.getElementById(id);
+const SUPABASE_URL = "https://fhypgkxtepqbjewzojpl.supabase.co";
+const SUPABASE_KEY = "sb_publishable_pyS5ndTJlrEvsRf6uslSgg_N0-8owM1";
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const load=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key))||fallback}catch(e){return fallback}};
 let orders=load("miraaya_orders",[]),staff=load("miraaya_staff",[]),attendance=load("miraaya_attendance",{});
 const save=()=>{localStorage.setItem("miraaya_orders",JSON.stringify(orders));localStorage.setItem("miraaya_staff",JSON.stringify(staff));localStorage.setItem("miraaya_attendance",JSON.stringify(attendance));render()};
@@ -134,6 +138,5 @@ function removeOrder(id){if(confirm("Delete this order?")){orders=orders.filter(
 function removeStaff(id){if(confirm("Remove this staff member?")){staff=staff.filter(s=>s.id!==id);save()}}
 render();
 </script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </body>
 </html>
