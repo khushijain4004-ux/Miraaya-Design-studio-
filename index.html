@@ -125,25 +125,37 @@ async function showLoginState() {
   $("appMain").hidden = !session;
 }
 
+
 $("loginForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const email = $("loginEmail").value.trim();
   const password = $("loginPassword").value;
-  $("loginMessage").textContent = "Logging in...";
+  const message = $("loginMessage");
+  const button = e.submitter;
 
-  const { error } = await supabase.auth.signInWithPassword({
-    email,
-    password
-  });
+  message.textContent = "Connecting to Supabase...";
+  if (button) button.disabled = true;
 
-  if (error) {
-    $("loginMessage").textContent = error.message;
-    return;
+  try {
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (error) {
+      message.textContent = "Login failed: " + error.message;
+      return;
+    }
+
+    message.textContent = "Login successful!";
+    await showLoginState();
+
+  } catch (err) {
+    message.textContent = "Connection error: " + err.message;
+  } finally {
+    if (button) button.disabled = false;
   }
-
-  $("loginMessage").textContent = "Login successful!";
-  await showLoginState();
 });
 
 supabase.auth.onAuthStateChange((_event, session) => {
@@ -152,10 +164,12 @@ supabase.auth.onAuthStateChange((_event, session) => {
 });
 
 showLoginState();
+
 $("logoutBtn").onclick = async () => {
-const { error } = await supabase.auth.signOut();
-if (error) alert(error.message);
+  const { error } = await supabase.auth.signOut();
+  if (error) alert(error.message);
 };
+  
 const load=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key))||fallback}catch(e){return fallback}};
 let orders=load("miraaya_orders",[]),staff=load("miraaya_staff",[]),attendance=load("miraaya_attendance",{});
 const save=()=>{localStorage.setItem("miraaya_orders",JSON.stringify(orders));localStorage.setItem("miraaya_staff",JSON.stringify(staff));localStorage.setItem("miraaya_attendance",JSON.stringify(attendance));render()};
